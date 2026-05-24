@@ -167,6 +167,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.error("Failed to login to Emporia Vue: %s", err)
         raise ConfigEntryAuthFailed("Failed to login to Emporia Vue") from err
 
+    if entry_data.get(AUTH_METHOD) == AUTH_METHOD_TOKENS and vue.auth and vue.auth.tokens:
+        # Persist the tokens refreshed during login back to the config entry so
+        # that the stored tokens stay current across restarts.
+        hass.config_entries.async_update_entry(
+            entry,
+            data={
+                **entry.data,
+                CONF_ID_TOKEN: vue.auth.tokens["id_token"],
+                CONF_ACCESS_TOKEN: vue.auth.tokens["access_token"],
+                CONF_REFRESH_TOKEN: vue.auth.tokens["refresh_token"],
+            },
+        )
+
+        def _token_updater(tokens: dict[str, Any]) -> None:
+            """Persist tokens refreshed mid-session back to the config entry."""
+            hass.loop.call_soon_threadsafe(
+                lambda: hass.config_entries.async_update_entry(
+                    entry,
+                    data={
+                        **entry.data,
+                        CONF_ID_TOKEN: tokens["id_token"],
+                        CONF_ACCESS_TOKEN: tokens["access_token"],
+                        CONF_REFRESH_TOKEN: tokens["refresh_token"],
+                    },
+                )
+            )
+
+        vue.auth.token_updater = _token_updater
+
     try:
         devices: list[VueDevice] = await loop.run_in_executor(None, vue.get_devices)
         for device in devices:

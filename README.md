@@ -22,7 +22,7 @@ Setting up a custom repository is done by:
 4. In the UI that opens, copy and paste the [url for this github repo](https://github.com/magico13/ha-emporia-vue) into the `Add custom repository URL` field.
 5. Set the category to `Integration`.
 6. Click the `Add` button.
-7. Select Emporia Vue from the list and press the download button. 
+7. Select Emporia Vue from the list and press the download button.
 8. Further configuration is done within the Integrations configuration in Home Assistant. You may need to restart home assistant and clear your browser cache before it appears, try ctrl+shift+r if you don't see it in the configuration list.
 
 ![hacs1](images/hacs1.PNG)
@@ -42,17 +42,16 @@ Configuration is done directly in the Home Assistant UI, no manual config file e
 2. Select `Integrations`
 3. Click the `+` button at the bottom
 4. Search for "Emporia Vue" and add it. If you do not see it in the list, ensure that you have installed the integration.
-5. In the UI that opens, choose the authentication method. For normal Emporia accounts, enter the email and password used for the Emporia App. For accounts created with Sign in with Google or another SSO provider, choose token authentication and enter the Emporia `id_token`, `access_token`, and `refresh_token`.
+5. In the UI that opens, enter the email and password used for the Emporia App. If your account uses Google/Apple, see the [Google/Apple Accounts](#googleapple-accounts) section below.
 6. Done! You should now have a sensor for each "channel".
 
-### Google/SSO Accounts
+### Google/Apple Accounts
 
-Emporia accounts created with Sign in with Google do not have an Emporia password that can be used by this integration. For those accounts, the setup flow accepts the same Emporia tokens supported by PyEmVue: `id_token`, `access_token`, and `refresh_token`.
+If your Emporia account was created via Sign in with Google or Apple, the easiest solution is to **set an Emporia password** using the create account flow on the Emporia website or app using the same email address as you'd use with Google/Apple. Once set, you can log in using the standard email and password method above.
 
-The integration stores those tokens in the Home Assistant config entry and uses the refresh token when logging in after restarts or reauthentication.
+If you are unable to set a password, the integration also supports token-based authentication. To obtain your tokens:
 
-### Sensor Naming
-
-Sensors are automatically named based on the information gotten from the Emporia API. They should be in the form `Power {Device_Name} {Channel_Id}` where the `Device_Name` is the name set in the Emporia app for the device and `Channel_Id` is the id of each sensor attached to the main Vue device. The Vue device itself has the channel id `1,2,3` indicating the three phase support built into the device. The sensor name can be changed in Home Assistant. Example: `Power Home 1,2,3`
-
-The Entity ID for each sensor is similar to the name but cannot be changed. The Entity ID uses the internal id of the device rather than the name since the id cannot change but the name can, ie `sensor.power_{Device_Id}_{Channel_Id}`. Example: `sensor.power_7576_123`
+1. Open [web.emporiaenergy.com](https://web.emporiaenergy.com) in a browser and sign in with Google/Apple.
+2. Open your browser's Developer Tools (F12) and go to the **Application** tab (Chrome/Edge) or **Storage** tab (Firefox).
+3. Under **IndexedDB** → **com.amplify.awsCognitoAuthPlugin** → **default.store**, look for keys ending in `.hostedUi.idToken`, `.hostedUi.accessToken`, and `.hostedUi.refreshToken` - copy the values of all three, making sure to only keep the values within the quotes (should start with `eyJ` or similar)
+4. Use those values in the token authentication step of the integration setup.
