@@ -24,6 +24,10 @@ from pyemvue.enums import Scale
 import requests
 import voluptuous as vol
 
+from .pycognito_compat import patch_pycognito_verify_token
+
+patch_pycognito_verify_token()
+
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant, State
