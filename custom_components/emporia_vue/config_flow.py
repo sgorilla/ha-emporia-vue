@@ -9,6 +9,10 @@ from typing import Any
 from pyemvue import PyEmVue
 import voluptuous as vol
 
+from .pycognito_compat import patch_pycognito_verify_token
+
+patch_pycognito_verify_token()
+
 from homeassistant import config_entries, exceptions
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 import homeassistant.helpers.config_validation as cv
